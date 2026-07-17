@@ -1,4 +1,4 @@
-const CACHE_NAME = 'shuttle-cache-v2'; // 버전 변경
+const CACHE_NAME = 'shuttle-cache-v2.1'; // 버전 변경
 const urlsToCache = [
   './',
   './index.html',
