@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>T1 셔틀버스 종합 도착 안내</title>
+<link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0056b3">
+    <style>
+        /* === 다크/라이트 모드 테마 변수 설정 === */
+        :root {
+            --bg-color: #f4f7f6;
+            --container-bg: white;
+            --text-color: #333;
+            --text-muted: #666;
+            --primary-color: #0056b3;
+            --box-bg: #e9f2fb;
+            --box-hover: #dcf0ff;
+            --box-active: #d0e3f5;
+            --border-color: #b3cce6;
+            --gray-text: #999;
+            --modal-bg: rgba(0,0,0,0.5);
+            --modal-content: white;
+            --row-border: #f0f0f0;
+            --progress-bg: #d1e3f8;
+        }
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --container-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --text-muted: #aaaaaa;
+            --primary-color: #66b2ff;
+            --box-bg: #2c3e50;
+            --box-hover: #34495e;
+            --box-active: #233240;
+            --border-color: #4a6278;
+            --gray-text: #777;
+            --modal-bg: rgba(0,0,0,0.7);
+            --modal-content: #2c3e50;
+            --row-border: #33495e;
+            --progress-bg: #1a252f;
+        }
+
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            text-align: center;
+            background-color: var(--bg-color);
+            padding-top: 20px;
+            color: var(--text-color);
+            margin: 0;
+            -webkit-tap-highlight-color: transparent;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .container {
+            background-color: var(--container-bg);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: inline-block;
+            max-width: 500px;
+            width: 90%;
+            margin-bottom: 30px;
+            transition: background-color 0.3s;
+            position: relative;
+        }
+        
+        /* 테마 변경 버튼 */
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            outline: none;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 5px;
+            margin-top: 10px;
+        }
+        .time-info {
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+        
+        .tab-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid var(--primary-color);
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            font-size: 1.1em;
+            font-weight: bold;
+            background-color: var(--container-bg);
+            color: var(--primary-color);
+            border: none;
+            cursor: pointer;
+            transition: 0.3s;
+            touch-action: manipulation;
+            user-select: none;
+        }
+        .tab-btn.active {
+            background-color: var(--primary-color);
+            color: var(--container-bg);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        .station-box {
+            background-color: var(--box-bg);
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            text-align: left;
+            line-height: 1.5;
+            cursor: pointer;
+            position: relative;
+            
+            -webkit-user-select: none;
+            user-select: none; 
+            touch-action: manipulation;
+            
+            transition: transform 0.1s, background-color 0.2s;
+        }
+        .station-box:active {
+            transform: scale(0.97);
+            background-color: var(--box-active);
+        }
+        @media (hover: hover) {
+            .station-box:hover {
+                background-color: var(--box-hover);
+            }
+        }
+        
+        .station-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .click-hint {
+            font-size: 0.75em;
+            color: var(--text-muted);
+            font-weight: normal;
+        }
+        
+        .highlight {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #d9534f;
+        }
+        .sub-text {
+            font-size: 0.95em;
+            color: var(--text-muted);
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed var(--border-color);
+        }
+        .gray-text { color: var(--gray-text); }
+
+        /* 프로그레스 바 스타일 */
+        .progress-bg {
+            width: 100%;
+            height: 6px;
+            background-color: var(--progress-bg);
+            border-radius: 3px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 1s linear, background-color 0.5s ease;
+        }
+
+        /* 모달(팝업) 스타일 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--modal-bg);
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.show {
+            display: flex;
+            opacity: 1;
+        }
+        .modal-content {
+            background-color: var(--modal-content);
+            padding: 20px;
+            border-radius: 12px;
+            width: 85%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            text-align: left;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+        }
+        .close-btn {
+            position: absolute;
+            right: 20px;
+            top: 15px;
+            font-size: 1.8em;
+            font-weight: bold;
+            color: var(--gray-text);
+            cursor: pointer;
+            line-height: 1;
+            touch-action: manipulation;
+            user-select: none;
+        }
+        .modal-title {
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--box-bg);
+        }
+        
+        .hour-row {
+            display: flex;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--row-border);
+        }
+        .hour-row:last-child { border-bottom: none; }
+        .hour-label {
+            width: 50px;
+            font-weight: bold;
+            color: var(--primary-color);
+            flex-shrink: 0;
+        }
+        .minute-list {
+            flex-grow: 1;
+            color: var(--text-color);
+        }
+        .minute-item {
+            display: inline-block;
+            width: 40px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <button class="theme-toggle" id="themeIcon" onclick="toggleTheme()">🌙</button>
+        <h2>T1 셔틀버스 도착 안내</h2>
+        <div class="time-info">현재 시간: <strong id="currentTime"></strong></div>
+        
+        <div class="tab-container">
+            <button class="tab-btn active" onclick="switchTab('p4')">P4 (장기주차장)</button>
+            <button class="tab-btn" onclick="switchTab('terminal')">터미널 (T1)</button>
+        </div>
+
+        <div id="tab-p4" class="tab-content active">
+            <div class="station-box" id="box-p4-emp" onclick="openModal('p4-emp')">계산 중...</div>
+            <div class="station-box" id="box-p4-4" onclick="openModal('p4-4')">계산 중...</div>
+            <div class="station-box" id="box-p4-5" onclick="openModal('p4-5')">계산 중...</div>
+        </div>
+
+        <div id="tab-terminal" class="tab-content">
+            <div class="station-box" id="box-t1-g3" onclick="openModal('t1-g3')">계산 중...</div>
+            <div class="station-box" id="box-t1-emp" onclick="openModal('t1-emp')">계산 중...</div>
+            <div class="station-box" id="box-t1-g13" onclick="openModal('t1-g13')">계산 중...</div>
+        </div>
+    </div>
+
+    <!-- 전체 시간표 모달창 -->
+    <div id="commonModal" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h3 id="modalTitle" class="modal-title">전체 시간표</h3>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        // === 테마(다크 모드) 설정 로직 ===
+        function toggleTheme() {
+            const body = document.documentElement;
+            const themeIcon = document.getElementById('themeIcon');
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.removeAttribute('data-theme');
+                themeIcon.innerText = '🌙';
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                themeIcon.innerText = '☀️';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        // 페이지 로드 시 저장된 테마 불러오기
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.getElementById('themeIcon').innerText = '☀️';
+        }
+
+        // === 시간표 데이터 ===
+        const schedule_P4_Emp = [
+            "06:30", "06:40", "06:50", "07:00", "07:10", "07:20", "07:40", "07:50",
+            "08:00", "08:10", "08:20", "08:30", "08:40", "08:50", "17:30", "17:40", 
+            "17:50", "18:00", "18:10", "18:20", "18:30", "18:40", "18:50", "19:10", 
+            "19:20", "19:30", "19:40", "19:50"
+        ];
+        
+        const schedule_T1_Emp = schedule_P4_Emp.map(timeStr => {
+            let [h, m] = timeStr.split(':').map(Number);
+            m += 5;
+            if (m >= 60) { h += 1; m -= 60; }
+            return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+        });
+
+        const schedule_P4_4 = ["04:40", "04:56", "05:12", "05:28", "05:44", "06:00", "06:16", "06:24", "06:32", "06:40", "06:48", "06:56", "07:12", "07:28", "07:44", "08:00", "08:16", "08:32", "08:48", "09:04", "09:20", "09:36", "09:52", "10:08", "10:24", "10:40", "10:56", "11:12", "11:28", "11:44", "12:00", "12:16", "12:32", "12:48", "13:04", "13:20", "13:36", "13:52", "14:08", "14:24", "14:40", "14:56", "15:12", "15:28", "15:44", "16:00", "16:16", "16:32", "16:48", "17:04", "17:20", "17:36", "17:52", "18:08", "18:24", "18:40", "18:56", "19:12", "19:28", "19:44", "20:00", "20:16", "20:32", "20:48", "20:56", "21:04", "21:12", "21:20", "21:28", "21:36", "21:44", "22:00", "22:16", "22:32", "22:48", "23:04", "23:20", "23:36", "23:52"];
+        const schedule_P4_5 = ["04:41", "04:57", "05:13", "05:29", "05:45", "06:01", "06:17", "06:25", "06:33", "06:41", "06:49", "06:57", "07:13", "07:29", "07:45", "08:01", "08:17", "08:33", "08:49", "09:05", "09:21", "09:37", "09:53", "10:09", "10:25", "10:41", "10:57", "11:13", "11:29", "11:45", "12:01", "12:17", "12:33", "12:49", "13:05", "13:21", "13:37", "13:53", "14:09", "14:25", "14:41", "14:57", "15:13", "15:29", "15:45", "16:01", "16:17", "16:33", "16:49", "17:05", "17:21", "17:37", "17:53", "18:09", "18:25", "18:41", "18:57", "19:13", "19:29", "19:45", "20:01", "20:17", "20:33", "20:49", "20:57", "21:05", "21:13", "21:21", "21:29", "21:37", "21:45", "22:01", "22:17", "22:33", "22:49", "23:05", "23:21", "23:37", "23:53"];
+        const schedule_T1_G3 = ["04:30", "04:46", "05:02", "05:18", "05:34", "05:50", "06:06", "06:14", "06:22", "06:30", "06:38", "06:46", "07:02", "07:18", "07:34", "07:50", "08:06", "08:22", "08:38", "08:54", "09:10", "09:26", "09:42", "09:58", "10:14", "10:30", "10:46", "11:02", "11:18", "11:34", "11:50", "12:06", "12:22", "12:38", "12:54", "13:10", "13:26", "13:42", "13:58", "14:14", "14:30", "14:46", "15:02", "15:18", "15:34", "15:50", "16:06", "16:22", "16:38", "16:54", "17:10", "17:26", "17:42", "17:58", "18:14", "18:30", "18:46", "19:02", "19:18", "19:34", "19:50", "20:06", "20:22", "20:38", "20:46", "20:54", "21:02", "21:10", "21:18", "21:26", "21:34", "21:50", "22:06", "22:22", "22:38", "22:54", "23:10", "23:26", "23:42"];
+        const schedule_T1_G13 = ["04:33", "04:49", "05:05", "05:21", "05:37", "05:53", "06:09", "06:17", "06:25", "06:33", "06:41", "06:49", "07:05", "07:21", "07:37", "07:53", "08:09", "08:25", "08:41", "08:57", "09:13", "09:29", "09:45", "10:01", "10:17", "10:33", "10:49", "11:05", "11:21", "11:37", "11:53", "12:09", "12:25", "12:41", "12:57", "13:13", "13:29", "13:45", "14:01", "14:17", "14:33", "14:49", "15:05", "15:21", "15:37", "15:53", "16:09", "16:25", "16:41", "16:57", "17:13", "17:29", "17:45", "18:01", "18:17", "18:33", "18:49", "19:05", "19:21", "19:37", "19:53", "20:09", "20:25", "20:41", "20:49", "20:57", "21:05", "21:13", "21:21", "21:29", "21:37", "21:53", "22:09", "22:25", "22:41", "22:57", "23:13", "23:29", "23:45"];
+
+        const stationData = {
+            'p4-emp': { title: "상주직원 (P4)", data: schedule_P4_Emp },
+            'p4-4': { title: "4번 승강장", data: schedule_P4_4 },
+            'p4-5': { title: "5번 승강장", data: schedule_P4_5 },
+            't1-g3': { title: "터미널동측 (3C)", data: schedule_T1_G3 },
+            't1-emp': { title: "상주직원 (9C)", data: schedule_T1_Emp },
+            't1-g13': { title: "터미널서측 (13C)", data: schedule_T1_G13 }
+        };
+
+        function toMinutes(arr) {
+            return arr.map(timeStr => {
+                const [h, m] = timeStr.split(':').map(Number);
+                return h * 60 + m;
+            });
+        }
+
+        const minData = {};
+        for(let key in stationData) {
+            minData[key] = toMinutes(stationData[key].data);
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            if (tabId === 'p4') {
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                document.getElementById('tab-p4').classList.add('active');
+            } else {
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                document.getElementById('tab-terminal').classList.add('active');
+            }
+            
+            // 변경된 탭을 로컬 스토리지에 저장
+            localStorage.setItem('savedTab', tabId);
+            
+            updateBusTime();
+        }
+
+        function generateResultHTML(key, currentMinutes) {
+            const title = stationData[key].title;
+            const timeArr = stationData[key].data;
+            const minArr = minData[key];
+            
+            let html = `
+                <div class="station-title">
+                    <span>${title}</span>
+                    <span class="click-hint">👆 Time Table</span>
+                </div>`;
+            
+            let nextBusIndex = -1;
+            for (let i = 0; i < minArr.length; i++) {
+                if (minArr[i] > currentMinutes) {
+                    nextBusIndex = i;
+                    break;
+                }
+            }
+
+            if (nextBusIndex !== -1) {
+                const diff1 = minArr[nextBusIndex] - currentMinutes;
+                
+                let barColor = "var(--primary-color)";
+                if(diff1 <= 5) barColor = "#d9534f"; // 5분 이하 빨강
+                else if(diff1 <= 10) barColor = "#f0ad4e"; // 10분 이하 주황
+                
+                let percent = Math.min((diff1 / 30) * 100, 100);
+
+                if (diff1 <= 30) {
+                    html += `<div>▶ 다음 버스: <strong>${timeArr[nextBusIndex]}</strong> (<span class="highlight" style="color:${barColor}">${diff1}분</span> 남음)</div>`;
+                    html += `<div class="progress-bg"><div class="progress-fill" style="width: ${percent}%; background-color: ${barColor};"></div></div>`;
+                } else {
+                    html += `<div class="gray-text">▶ 다음 버스: <strong>${timeArr[nextBusIndex]}</strong> (${diff1}분 남음)</div>`;
+                }
+                
+                if (nextBusIndex + 1 < minArr.length) {
+                    const diff2 = minArr[nextBusIndex + 1] - currentMinutes;
+                    if (diff2 <= 30) {
+                        html += `<div class="sub-text">▶ 다다음 버스: <strong>${timeArr[nextBusIndex + 1]}</strong> (${diff2}분 남음)</div>`;
+                    } else {
+                        html += `<div class="sub-text gray-text">▶ 다다음 버스: <strong>${timeArr[nextBusIndex + 1]}</strong> (${diff2}분 남음)</div>`;
+                    }
+                } else {
+                    html += `<div class="sub-text">▶ 금일 마지막 버스입니다.</div>`;
+                }
+            } else {
+                html += `<div class="gray-text">금일 운행이 종료되었습니다.</div>`;
+            }
+            return html;
+        }
+
+        function updateBusTime() {
+            const now = new Date();
+            document.getElementById('currentTime').innerText = now.toLocaleTimeString('ko-KR', { hour12: false });
+            const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+            Object.keys(stationData).forEach(key => {
+                const domId = 'box-' + key;
+                document.getElementById(domId).innerHTML = generateResultHTML(key, currentMinutes);
+            });
+        }
+
+        function openModal(stationKey) {
+            const station = stationData[stationKey];
+            if (!station) return;
+
+            document.getElementById('modalTitle').innerText = station.title + " 전체 시간표";
+            
+            const grouped = {};
+            station.data.forEach(time => {
+                const [h, m] = time.split(':');
+                if (!grouped[h]) grouped[h] = [];
+                grouped[h].push(m);
+            });
+
+            const sortedHours = Object.keys(grouped).sort();
+
+            let html = '';
+            for (let hour of sortedHours) {
+                const minutesHtml = grouped[hour].map(m => `<span class="minute-item">${m}</span>`).join('');
+                html += `
+                    <div class="hour-row">
+                        <div class="hour-label">${hour}시</div>
+                        <div class="minute-list">${minutesHtml}</div>
+                    </div>`;
+            }
+
+            document.getElementById('modalBody').innerHTML = html;
+            
+            const modal = document.getElementById('commonModal');
+            modal.style.display = 'flex';
+            setTimeout(() => { modal.classList.add('show'); }, 10);
+        }
+
+        function closeModal(event) {
+            if(event && event.target.id !== 'commonModal') return; 
+            
+            const modal = document.getElementById('commonModal');
+            modal.classList.remove('show');
+            setTimeout(() => { modal.style.display = 'none'; }, 300);
+        }
+
+        // === 앱 초기화 로직 ===
+        // 1. 저장된 탭 불러와서 설정하기 (기본값은 'p4')
+        const lastTab = localStorage.getItem('savedTab') || 'p4';
+        switchTab(lastTab);
+        
+        // 2. 1초마다 시간 업데이트 실행
+        setInterval(updateBusTime, 1000);
+        // PWA 서비스 워커 등록
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker 등록 성공:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('ServiceWorker 등록 실패:', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
