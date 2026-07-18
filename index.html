@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>T1 셔틀버스 종합 도착 안내</title>
-<link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0056b3">
     <style>
         /* === 다크/라이트 모드 테마 변수 설정 === */
         :root {
-            --bg-color: #f4f7f6;
+            --bg-color: #e9ecef;
             --container-bg: white;
             --text-color: #333;
             --text-muted: #666;
@@ -23,9 +23,10 @@
             --modal-content: white;
             --row-border: #f0f0f0;
             --progress-bg: #d1e3f8;
+            --current-row-bg: rgba(0, 86, 179, 0.08);
         }
         [data-theme="dark"] {
-            --bg-color: #121212;
+            --bg-color: #0a0a0a;
             --container-bg: #1e1e1e;
             --text-color: #e0e0e0;
             --text-muted: #aaaaaa;
@@ -34,32 +35,35 @@
             --box-hover: #34495e;
             --box-active: #233240;
             --border-color: #4a6278;
-            --gray-text: #777;
+            --gray-text: #666;
             --modal-bg: rgba(0,0,0,0.7);
             --modal-content: #2c3e50;
             --row-border: #33495e;
             --progress-bg: #1a252f;
+            --current-row-bg: rgba(102, 178, 255, 0.15);
         }
 
+        /* 전체 화면 꽉 차게 조정 */
         body {
             font-family: 'Malgun Gothic', sans-serif;
             text-align: center;
             background-color: var(--bg-color);
-            padding-top: 20px;
-            color: var(--text-color);
             margin: 0;
+            padding: 0;
+            color: var(--text-color);
             -webkit-tap-highlight-color: transparent;
             transition: background-color 0.3s, color 0.3s;
+            display: flex;
+            justify-content: center;
         }
         .container {
             background-color: var(--container-bg);
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            display: inline-block;
-            max-width: 500px;
-            width: 90%;
-            margin-bottom: 30px;
+            padding: 25px 20px;
+            width: 100%;
+            max-width: 500px; /* 넓은 화면 대비 최대치 제한 */
+            min-height: 100vh; /* 화면 높이 전체 차지 */
+            box-sizing: border-box;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
             transition: background-color 0.3s;
             position: relative;
         }
@@ -250,15 +254,23 @@
         
         .hour-row {
             display: flex;
-            padding: 10px 0;
+            padding: 10px;
             border-bottom: 1px solid var(--row-border);
+            border-radius: 8px;
         }
         .hour-row:last-child { border-bottom: none; }
+        
+        /* 현재 시간 강조 스타일 */
+        .hour-row.current {
+            background-color: var(--current-row-bg);
+            border: 1px solid var(--border-color);
+        }
         .hour-label {
             width: 50px;
             font-weight: bold;
             color: var(--primary-color);
             flex-shrink: 0;
+            padding-top: 2px;
         }
         .minute-list {
             flex-grow: 1;
@@ -266,9 +278,25 @@
         }
         .minute-item {
             display: inline-block;
-            width: 40px;
-            margin-right: 5px;
-            margin-bottom: 5px;
+            width: 36px;
+            text-align: center;
+            margin-right: 6px;
+            margin-bottom: 6px;
+            padding: 2px 0;
+            border-radius: 4px;
+        }
+        /* 지나간 시간 취소선 */
+        .minute-item.past {
+            color: var(--gray-text);
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+        /* 가장 빠른 다음 차 강조 배지 */
+        .minute-item.next {
+            background-color: #d9534f;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(217, 83, 79, 0.4);
         }
     </style>
 </head>
@@ -321,7 +349,6 @@
                 localStorage.setItem('theme', 'dark');
             }
         }
-        // 페이지 로드 시 저장된 테마 불러오기
         if (localStorage.getItem('theme') === 'dark') {
             document.documentElement.setAttribute('data-theme', 'dark');
             document.getElementById('themeIcon').innerText = '☀️';
@@ -349,11 +376,11 @@
 
         const stationData = {
             'p4-emp': { title: "상주직원전용버스 (P4)", data: schedule_P4_Emp },
-            'p4-4': { title: "공항01순환버스(4번 승강장)", data: schedule_P4_4 },
-            'p4-5': { title: "공항01순환버스(5번 승강장", data: schedule_P4_5 },
-            't1-g3': { title: "공항01순환버스(터미널동측-3C)", data: schedule_T1_G3 },
+            'p4-4': { title: "공항01순환버스 (4번 승강장)", data: schedule_P4_4 },
+            'p4-5': { title: "공항01순환버스 (5번 승강장)", data: schedule_P4_5 },
+            't1-g3': { title: "공항01순환버스 (터미널동측-3C)", data: schedule_T1_G3 },
             't1-emp': { title: "상주직원전용버스 (9C)", data: schedule_T1_Emp },
-            't1-g13': { title: "공항01순환버스(터미널서측-13C)", data: schedule_T1_G13 }
+            't1-g13': { title: "공항01순환버스 (터미널서측-13C)", data: schedule_T1_G13 }
         };
 
         function toMinutes(arr) {
@@ -380,9 +407,7 @@
                 document.getElementById('tab-terminal').classList.add('active');
             }
             
-            // 변경된 탭을 로컬 스토리지에 저장
             localStorage.setItem('savedTab', tabId);
-            
             updateBusTime();
         }
 
@@ -452,8 +477,25 @@
             const station = stationData[stationKey];
             if (!station) return;
 
-            document.getElementById('modalTitle').innerText = station.title + " 전체 시간표";
+            document.getElementById('modalTitle').innerText = station.title + " 시간표";
             
+            // 현재 시간 계산 (강조용)
+            const now = new Date();
+            const currentMinutes = now.getHours() * 60 + now.getMinutes();
+            const currentHourStr = String(now.getHours()).padStart(2, '0');
+            
+            // 다음 버스 찾기
+            const minArr = minData[stationKey];
+            let nextBusIndex = -1;
+            for (let i = 0; i < minArr.length; i++) {
+                if (minArr[i] > currentMinutes) {
+                    nextBusIndex = i;
+                    break;
+                }
+            }
+            const nextBusTime = nextBusIndex !== -1 ? station.data[nextBusIndex] : null;
+
+            // 시간대별 그룹화
             const grouped = {};
             station.data.forEach(time => {
                 const [h, m] = time.split(':');
@@ -465,9 +507,27 @@
 
             let html = '';
             for (let hour of sortedHours) {
-                const minutesHtml = grouped[hour].map(m => `<span class="minute-item">${m}</span>`).join('');
+                // 현재 시간대의 Row 배경 강조
+                const isCurrentHour = (hour === currentHourStr);
+                const rowClass = isCurrentHour ? 'hour-row current' : 'hour-row';
+
+                const minutesHtml = grouped[hour].map(m => {
+                    const timeStr = `${hour}:${m}`;
+                    let minClass = 'minute-item';
+                    
+                    if (timeStr === nextBusTime) {
+                        minClass += ' next'; // 가장 빠른 다음 차 강조
+                    } else {
+                        const timeMin = parseInt(hour, 10) * 60 + parseInt(m, 10);
+                        if (timeMin <= currentMinutes) {
+                            minClass += ' past'; // 이미 지난 시간 취소선 및 흐리게
+                        }
+                    }
+                    return `<span class="${minClass}">${m}</span>`;
+                }).join('');
+
                 html += `
-                    <div class="hour-row">
+                    <div class="${rowClass}">
                         <div class="hour-label">${hour}시</div>
                         <div class="minute-list">${minutesHtml}</div>
                     </div>`;
@@ -477,7 +537,17 @@
             
             const modal = document.getElementById('commonModal');
             modal.style.display = 'flex';
-            setTimeout(() => { modal.classList.add('show'); }, 10);
+            
+            // 모달 애니메이션 및 자동 스크롤
+            setTimeout(() => { 
+                modal.classList.add('show'); 
+                
+                // 현재 시간 혹은 다음 버스 위치로 스크롤 이동
+                const targetScroll = document.querySelector('.minute-item.next') || document.querySelector('.hour-row.current');
+                if (targetScroll) {
+                    targetScroll.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 10);
         }
 
         function closeModal(event) {
@@ -489,12 +559,11 @@
         }
 
         // === 앱 초기화 로직 ===
-        // 1. 저장된 탭 불러와서 설정하기 (기본값은 'p4')
         const lastTab = localStorage.getItem('savedTab') || 'p4';
         switchTab(lastTab);
         
-        // 2. 1초마다 시간 업데이트 실행
         setInterval(updateBusTime, 1000);
+        
         // PWA 서비스 워커 등록
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
