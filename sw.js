@@ -1,4 +1,4 @@
-const CACHE_NAME = 'shuttle-cache-v3.2'; // 시간표 수정 시 이 숫자를 올려주세요!
+const CACHE_NAME = 'shuttle-cache-v3.3'; // 시간표 수정 시 이 숫자를 올려주세요!
 const urlsToCache = [
   './',
   './index.html',
