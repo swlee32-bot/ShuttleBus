@@ -13,34 +13,95 @@
             --container-bg: white;
             --text-color: #333;
             --text-muted: #666;
+            
+            /* 기본 및 P4 테마 색상 (푸른 계열) */
             --primary-color: #0056b3;
             --box-bg: #e9f2fb;
             --box-hover: #dcf0ff;
             --box-active: #d0e3f5;
             --border-color: #b3cce6;
+            --progress-bg: #d1e3f8;
+            --current-row-bg: rgba(0, 86, 179, 0.08);
+
+            /* 터미널 테마 색상 (청록/에메랄드 계열로 구분) */
+            --term-primary-color: #007769;
+            --term-box-bg: #e6f4f1;
+            --term-box-hover: #d3ede7;
+            --term-box-active: #bfe7de;
+            --term-border-color: #99d6c8;
+            --term-progress-bg: #ccebe3;
+            --term-current-row-bg: rgba(0, 119, 105, 0.08);
+
+            /* 상주직원 전용 카드 색상 (보라/인디고 계열로 공항순환과 구분) */
+            --staff-primary-color: #5b358c;
+            --staff-box-bg: #f3eff9;
+            --staff-box-hover: #e8e0f5;
+            --staff-box-active: #ddd1f0;
+            --staff-border-color: #d1bfe4;
+            --staff-progress-bg: #e2d4ec;
+            --staff-current-row-bg: rgba(91, 53, 140, 0.08);
+
             --gray-text: #999;
             --modal-bg: rgba(0,0,0,0.5);
             --modal-content: white;
             --row-border: #f0f0f0;
-            --progress-bg: #d1e3f8;
-            --current-row-bg: rgba(0, 86, 179, 0.08);
         }
+
         [data-theme="dark"] {
             --bg-color: #0a0a0a;
             --container-bg: #1e1e1e;
             --text-color: #e0e0e0;
             --text-muted: #aaaaaa;
+            
             --primary-color: #66b2ff;
             --box-bg: #2c3e50;
             --box-hover: #34495e;
             --box-active: #233240;
             --border-color: #4a6278;
+            --progress-bg: #1a252f;
+            --current-row-bg: rgba(102, 178, 255, 0.15);
+
+            --term-primary-color: #4db6ac;
+            --term-box-bg: #1a3330;
+            --term-box-hover: #224340;
+            --term-box-active: #132624;
+            --term-border-color: #337a70;
+            --term-progress-bg: #162b28;
+            --term-current-row-bg: rgba(77, 182, 172, 0.15);
+
+            --staff-primary-color: #b39ddb;
+            --staff-box-bg: #31263e;
+            --staff-box-hover: #3e314f;
+            --staff-box-active: #251d2f;
+            --staff-border-color: #6a4f8c;
+            --staff-progress-bg: #281f33;
+            --staff-current-row-bg: rgba(179, 157, 219, 0.15);
+
             --gray-text: #666;
             --modal-bg: rgba(0,0,0,0.7);
             --modal-content: #2c3e50;
             --row-border: #33495e;
-            --progress-bg: #1a252f;
-            --current-row-bg: rgba(102, 178, 255, 0.15);
+        }
+
+        /* 탭별 컨테이너 전역 변수 매핑 클래스 */
+        body.theme-p4 {
+            --active-primary: var(--primary-color);
+            --active-box-bg: var(--box-bg);
+            --active-box-hover: var(--box-hover);
+            --active-box-active: var(--box-active);
+            --active-border-color: var(--border-color);
+            --active-progress-bg: var(--progress-bg);
+            --active-current-row: var(--current-row-bg);
+        }
+
+        body.theme-terminal {
+            --active-primary: var(--term-primary-color);
+            --active-box-bg: var(--term-box-bg);
+            --active-box-hover: var(--term-box-hover);
+            --active-box-active: var(--term-box-active);
+            --active-border-color: var(--term-border-color);
+            --active-progress-bg: var(--term-progress-bg);
+            --active-current-row: var(--term-current-row-bg);
         }
 
         /* 전체 화면 꽉 차게 조정 */
@@ -60,8 +121,8 @@
             background-color: var(--container-bg);
             padding: 25px 20px;
             width: 100%;
-            max-width: 500px; /* 넓은 화면 대비 최대치 제한 */
-            min-height: 100vh; /* 화면 높이 전체 차지 */
+            max-width: 500px;
+            min-height: 100vh;
             box-sizing: border-box;
             box-shadow: 0 0 20px rgba(0,0,0,0.05);
             transition: background-color 0.3s;
@@ -81,9 +142,10 @@
         }
 
         h2 {
-            color: var(--primary-color);
+            color: var(--active-primary, var(--primary-color));
             margin-bottom: 5px;
             margin-top: 10px;
+            transition: color 0.3s;
         }
         .time-info {
             color: var(--text-muted);
@@ -97,7 +159,8 @@
             margin-bottom: 20px;
             border-radius: 8px;
             overflow: hidden;
-            border: 2px solid var(--primary-color);
+            border: 2px solid var(--active-primary, var(--primary-color));
+            transition: border-color 0.3s;
         }
         .tab-btn {
             flex: 1;
@@ -105,17 +168,37 @@
             font-size: 1.1em;
             font-weight: bold;
             background-color: var(--container-bg);
-            color: var(--primary-color);
+            color: var(--active-primary, var(--primary-color));
             border: none;
             cursor: pointer;
             transition: 0.3s;
             touch-action: manipulation;
             user-select: none;
         }
-        .tab-btn.active {
+        /* 각 탭 버튼의 개별 색상 구분 */
+        .tab-btn.tab-p4 {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        .tab-btn.tab-p4.active {
             background-color: var(--primary-color);
             color: var(--container-bg);
         }
+        .tab-container:has(.tab-btn.tab-p4.active) {
+            border-color: var(--primary-color);
+        }
+
+        .tab-btn.tab-terminal {
+            color: var(--term-primary-color);
+        }
+        .tab-btn.tab-terminal.active {
+            background-color: var(--term-primary-color);
+            color: var(--container-bg);
+        }
+        .tab-container:has(.tab-btn.tab-terminal.active) {
+            border-color: var(--term-primary-color);
+        }
+
         .tab-content {
             display: none;
         }
@@ -123,8 +206,9 @@
             display: block;
         }
 
+        /* 기본 공항순환/일반 버스 카드 스타일 */
         .station-box {
-            background-color: var(--box-bg);
+            background-color: var(--active-box-bg, var(--box-bg));
             padding: 15px 20px;
             border-radius: 10px;
             margin-bottom: 15px;
@@ -137,28 +221,51 @@
             user-select: none; 
             touch-action: manipulation;
             
-            transition: transform 0.1s, background-color 0.2s;
+            transition: transform 0.1s, background-color 0.2s, border-color 0.2s;
+            border: 1px solid var(--active-border-color, var(--border-color));
         }
         .station-box:active {
             transform: scale(0.97);
-            background-color: var(--box-active);
+            background-color: var(--active-box-active, var(--box-active));
         }
         @media (hover: hover) {
             .station-box:hover {
-                background-color: var(--box-hover);
+                background-color: var(--active-box-hover, var(--box-hover));
             }
         }
         
         .station-title {
             font-size: 1.1em;
             font-weight: bold;
-            color: var(--primary-color);
+            color: var(--active-primary, var(--primary-color));
             margin-bottom: 10px;
-            border-bottom: 2px solid var(--border-color);
+            border-bottom: 2px solid var(--active-border-color, var(--border-color));
             padding-bottom: 5px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: color 0.3s, border-color 0.3s;
+        }
+
+        /* 상주직원 전용 카드 전용 테마 스타일 */
+        .station-box.staff-box {
+            background-color: var(--staff-box-bg);
+            border-color: var(--staff-border-color);
+        }
+        .station-box.staff-box:active {
+            background-color: var(--staff-box-active);
+        }
+        @media (hover: hover) {
+            .station-box.staff-box:hover {
+                background-color: var(--staff-box-hover);
+            }
+        }
+        .station-box.staff-box .station-title {
+            color: var(--staff-primary-color);
+            border-bottom-color: var(--staff-border-color);
+        }
+        .station-box.staff-box .progress-bg {
+            background-color: var(--staff-progress-bg);
         }
         
         .click-hint {
@@ -177,7 +284,11 @@
             color: var(--text-muted);
             margin-top: 10px;
             padding-top: 10px;
-            border-top: 1px dashed var(--border-color);
+            border-top: 1px dashed var(--active-border-color, var(--border-color));
+            transition: border-color 0.3s;
+        }
+        .station-box.staff-box .sub-text {
+            border-top-color: var(--staff-border-color);
         }
         .gray-text { color: var(--gray-text); }
 
@@ -185,10 +296,11 @@
         .progress-bg {
             width: 100%;
             height: 6px;
-            background-color: var(--progress-bg);
+            background-color: var(--active-progress-bg, var(--progress-bg));
             border-radius: 3px;
             margin-top: 8px;
             overflow: hidden;
+            transition: background-color 0.3s;
         }
         .progress-fill {
             height: 100%;
@@ -245,11 +357,12 @@
             user-select: none;
         }
         .modal-title {
-            color: var(--primary-color);
+            color: var(--active-primary, var(--primary-color));
             margin-top: 0;
             margin-bottom: 15px;
             padding-bottom: 10px;
-            border-bottom: 2px solid var(--box-bg);
+            border-bottom: 2px solid var(--active-box-bg, var(--box-bg));
+            transition: color 0.3s;
         }
         
         .hour-row {
@@ -262,15 +375,16 @@
         
         /* 현재 시간 강조 스타일 */
         .hour-row.current {
-            background-color: var(--current-row-bg);
-            border: 1px solid var(--border-color);
+            background-color: var(--active-current-row, var(--current-row-bg));
+            border: 1px solid var(--active-border-color, var(--border-color));
         }
         .hour-label {
             width: 50px;
             font-weight: bold;
-            color: var(--primary-color);
+            color: var(--active-primary, var(--primary-color));
             flex-shrink: 0;
             padding-top: 2px;
+            transition: color 0.3s;
         }
         .minute-list {
             flex-grow: 1;
@@ -300,27 +414,27 @@
         }
     </style>
 </head>
-<body>
+<body class="theme-p4">
 
     <div class="container">
         <button class="theme-toggle" id="themeIcon" onclick="toggleTheme()">🌙</button>
-        <h2>T1 셔틀버스 도착 안내</h2>
+        <h2 id="mainTitle">T1 셔틀버스 도착 안내</h2>
         <div class="time-info">현재 시간: <strong id="currentTime"></strong></div>
         
         <div class="tab-container">
-            <button class="tab-btn active" onclick="switchTab('p4')">P4 (장기주차장)</button>
-            <button class="tab-btn" onclick="switchTab('terminal')">터미널 (T1)</button>
+            <button class="tab-btn tab-p4 active" onclick="switchTab('p4')">P4 (장기주차장)</button>
+            <button class="tab-btn tab-terminal" onclick="switchTab('terminal')">터미널 (T1)</button>
         </div>
 
         <div id="tab-p4" class="tab-content active">
-            <div class="station-box" id="box-p4-emp" onclick="openModal('p4-emp')">계산 중...</div>
+            <div class="station-box staff-box" id="box-p4-emp" onclick="openModal('p4-emp')">계산 중...</div>
             <div class="station-box" id="box-p4-4" onclick="openModal('p4-4')">계산 중...</div>
             <div class="station-box" id="box-p4-5" onclick="openModal('p4-5')">계산 중...</div>
         </div>
 
         <div id="tab-terminal" class="tab-content">
             <div class="station-box" id="box-t1-g3" onclick="openModal('t1-g3')">계산 중...</div>
-            <div class="station-box" id="box-t1-emp" onclick="openModal('t1-emp')">계산 중...</div>
+            <div class="station-box staff-box" id="box-t1-emp" onclick="openModal('t1-emp')">계산 중...</div>
             <div class="station-box" id="box-t1-g13" onclick="openModal('t1-g13')">계산 중...</div>
         </div>
     </div>
@@ -355,7 +469,7 @@
         }
 
         // === 시간표 데이터 ===
-const schedule_P4_Emp = [
+        const schedule_P4_Emp = [
             "05:35", "05:45", "05:55", "06:05", "06:15", "06:25", "06:35", "06:45",
             "06:55", "07:05", "07:15", "07:25", "07:35", "07:45", "07:55", "08:05",
             "08:15", "08:25", "08:35", "08:45", "08:55", "17:35", "17:45", "17:55",
@@ -402,12 +516,19 @@ const schedule_P4_Emp = [
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
 
+            const body = document.body;
+            body.classList.remove('theme-p4', 'theme-terminal');
+
             if (tabId === 'p4') {
                 document.querySelectorAll('.tab-btn')[0].classList.add('active');
                 document.getElementById('tab-p4').classList.add('active');
+                body.classList.add('theme-p4');
+                document.getElementById('mainTitle').innerText = "T1 셔틀버스 도착 안내 (P4)";
             } else {
                 document.querySelectorAll('.tab-btn')[1].classList.add('active');
                 document.getElementById('tab-terminal').classList.add('active');
+                body.classList.add('theme-terminal');
+                document.getElementById('mainTitle').innerText = "T1 셔틀버스 도착 안내 (터미널)";
             }
             
             localStorage.setItem('savedTab', tabId);
@@ -415,8 +536,9 @@ const schedule_P4_Emp = [
         }
 
         function generateResultHTML(key, currentMinutes) {
-            const title = stationData[key].title;
-            const timeArr = stationData[key].data;
+            const station = stationData[key];
+            const title = station.title;
+            const timeArr = station.data;
             const minArr = minData[key];
             
             let html = `
@@ -436,7 +558,7 @@ const schedule_P4_Emp = [
             if (nextBusIndex !== -1) {
                 const diff1 = minArr[nextBusIndex] - currentMinutes;
                 
-                let barColor = "var(--primary-color)";
+                let barColor = key.includes('emp') ? "var(--staff-primary-color)" : "var(--active-primary)";
                 if(diff1 <= 5) barColor = "#d9534f"; // 5분 이하 빨강
                 else if(diff1 <= 10) barColor = "#f0ad4e"; // 10분 이하 주황
                 
@@ -482,12 +604,10 @@ const schedule_P4_Emp = [
 
             document.getElementById('modalTitle').innerText = station.title + " 시간표";
             
-            // 현재 시간 계산 (강조용)
             const now = new Date();
             const currentMinutes = now.getHours() * 60 + now.getMinutes();
             const currentHourStr = String(now.getHours()).padStart(2, '0');
             
-            // 다음 버스 찾기
             const minArr = minData[stationKey];
             let nextBusIndex = -1;
             for (let i = 0; i < minArr.length; i++) {
@@ -498,7 +618,6 @@ const schedule_P4_Emp = [
             }
             const nextBusTime = nextBusIndex !== -1 ? station.data[nextBusIndex] : null;
 
-            // 시간대별 그룹화
             const grouped = {};
             station.data.forEach(time => {
                 const [h, m] = time.split(':');
@@ -510,7 +629,6 @@ const schedule_P4_Emp = [
 
             let html = '';
             for (let hour of sortedHours) {
-                // 현재 시간대의 Row 배경 강조
                 const isCurrentHour = (hour === currentHourStr);
                 const rowClass = isCurrentHour ? 'hour-row current' : 'hour-row';
 
@@ -519,11 +637,11 @@ const schedule_P4_Emp = [
                     let minClass = 'minute-item';
                     
                     if (timeStr === nextBusTime) {
-                        minClass += ' next'; // 가장 빠른 다음 차 강조
+                        minClass += ' next';
                     } else {
                         const timeMin = parseInt(hour, 10) * 60 + parseInt(m, 10);
                         if (timeMin <= currentMinutes) {
-                            minClass += ' past'; // 이미 지난 시간 취소선 및 흐리게
+                            minClass += ' past';
                         }
                     }
                     return `<span class="${minClass}">${m}</span>`;
@@ -541,11 +659,8 @@ const schedule_P4_Emp = [
             const modal = document.getElementById('commonModal');
             modal.style.display = 'flex';
             
-            // 모달 애니메이션 및 자동 스크롤
             setTimeout(() => { 
                 modal.classList.add('show'); 
-                
-                // 현재 시간 혹은 다음 버스 위치로 스크롤 이동
                 const targetScroll = document.querySelector('.minute-item.next') || document.querySelector('.hour-row.current');
                 if (targetScroll) {
                     targetScroll.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -567,7 +682,6 @@ const schedule_P4_Emp = [
         
         setInterval(updateBusTime, 1000);
         
-        // PWA 서비스 워커 등록
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
