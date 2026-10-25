@@ -9,10 +9,11 @@
     <style>
         /* === 다크/라이트 모드 테마 변수 설정 === */
         :root {
-            --bg-color: #e9ecef;
+            --bg-color: #f4f6f8;
             --container-bg: white;
             --text-color: #333;
-            --text-muted: #666;
+            --text-muted: #888;
+            --segment-bg: #eef1f5;
             
             /* 기본 및 P4 테마 색상 (푸른 계열) */
             --primary-color: #0056b3;
@@ -49,9 +50,10 @@
 
         [data-theme="dark"] {
             --bg-color: #0a0a0a;
-            --container-bg: #1e1e1e;
+            --container-bg: #1c1c1e;
             --text-color: #e0e0e0;
             --text-muted: #aaaaaa;
+            --segment-bg: #000000;
             
             --primary-color: #66b2ff;
             --box-bg: #2c3e50;
@@ -106,7 +108,7 @@
 
         /* 전체 화면 꽉 차게 조정 */
         body {
-            font-family: 'Malgun Gothic', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
             text-align: center;
             background-color: var(--bg-color);
             margin: 0;
@@ -127,91 +129,85 @@
             box-shadow: 0 0 20px rgba(0,0,0,0.05);
             transition: background-color 0.3s;
             position: relative;
+            padding-bottom: 80px; /* 플로팅 버튼 가림 방지 */
         }
         
-        /* 테마 변경 버튼 */
-        .theme-toggle {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: none;
-            border: none;
-            font-size: 1.5em;
-            cursor: pointer;
-            outline: none;
-        }
-
         h2 {
             color: var(--active-primary, var(--primary-color));
-            margin-bottom: 5px;
+            margin-bottom: 12px;
             margin-top: 10px;
+            font-size: 1.5em;
             transition: color 0.3s;
         }
-        .time-info {
-            color: var(--text-muted);
-            margin-bottom: 20px;
-            font-size: 1.1em;
+        
+        /* 현재 시간 뱃지 스타일 (알약 형태) */
+        .time-badge-wrapper {
+            margin-bottom: 25px;
+        }
+        .time-badge {
+            display: inline-block;
+            background-color: var(--active-box-bg);
+            color: var(--active-primary);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.95em;
+            font-weight: 600;
+            border: 1px solid var(--active-border-color);
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
         
+        /* iOS 스타일 세그먼트 컨트롤 탭 */
         .tab-container {
             display: flex;
-            justify-content: center;
+            background-color: var(--segment-bg);
+            padding: 4px;
+            border-radius: 12px;
             margin-bottom: 20px;
-            border-radius: 8px;
-            overflow: hidden;
-            border: 2px solid var(--active-primary, var(--primary-color));
-            transition: border-color 0.3s;
+            gap: 4px;
+            border: none;
+            transition: background-color 0.3s;
         }
         .tab-btn {
             flex: 1;
-            padding: 12px;
-            font-size: 1.1em;
-            font-weight: bold;
-            background-color: var(--container-bg);
-            color: var(--active-primary, var(--primary-color));
+            padding: 10px 0;
+            font-size: 1.05em;
+            font-weight: 600;
+            border-radius: 10px;
+            background-color: transparent;
+            color: var(--text-muted);
             border: none;
             cursor: pointer;
-            transition: 0.3s;
+            transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
             touch-action: manipulation;
             user-select: none;
         }
-        /* 각 탭 버튼의 개별 색상 구분 */
-        .tab-btn.tab-p4 {
-            color: var(--primary-color);
-            border-color: var(--primary-color);
-        }
-        .tab-btn.tab-p4.active {
-            background-color: var(--primary-color);
-            color: var(--container-bg);
-        }
-        .tab-container:has(.tab-btn.tab-p4.active) {
-            border-color: var(--primary-color);
-        }
-
-        .tab-btn.tab-terminal {
-            color: var(--term-primary-color);
-        }
-        .tab-btn.tab-terminal.active {
-            background-color: var(--term-primary-color);
-            color: var(--container-bg);
-        }
-        .tab-container:has(.tab-btn.tab-terminal.active) {
-            border-color: var(--term-primary-color);
+        .tab-btn.active {
+            background-color: var(--container-bg);
+            color: var(--active-primary);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            font-weight: 700;
         }
 
         .tab-content {
             display: none;
+            animation: fadeIn 0.3s ease;
         }
         .tab-content.active {
             display: block;
         }
 
-        /* 기본 공항순환/일반 버스 카드 스타일 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 입체감이 추가된 카드 스타일 */
         .station-box {
             background-color: var(--active-box-bg, var(--box-bg));
-            padding: 15px 20px;
-            border-radius: 10px;
-            margin-bottom: 15px;
+            padding: 18px 20px;
+            border-radius: 14px;
+            margin-bottom: 16px;
             text-align: left;
             line-height: 1.5;
             cursor: pointer;
@@ -221,26 +217,29 @@
             user-select: none; 
             touch-action: manipulation;
             
-            transition: transform 0.1s, background-color 0.2s, border-color 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
             border: 1px solid var(--active-border-color, var(--border-color));
+            transition: transform 0.15s, background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
         }
         .station-box:active {
             transform: scale(0.97);
             background-color: var(--active-box-active, var(--box-active));
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
         }
         @media (hover: hover) {
             .station-box:hover {
                 background-color: var(--active-box-hover, var(--box-hover));
+                box-shadow: 0 6px 14px rgba(0,0,0,0.06);
             }
         }
         
         .station-title {
-            font-size: 1.1em;
+            font-size: 1.15em;
             font-weight: bold;
             color: var(--active-primary, var(--primary-color));
-            margin-bottom: 10px;
-            border-bottom: 2px solid var(--active-border-color, var(--border-color));
-            padding-bottom: 5px;
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--active-border-color, var(--border-color));
+            padding-bottom: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -268,10 +267,16 @@
             background-color: var(--staff-progress-bg);
         }
         
+        /* 힌트 텍스트(아이콘) 스타일 개선 */
         .click-hint {
-            font-size: 0.75em;
+            font-size: 1.2em;
             color: var(--text-muted);
             font-weight: normal;
+            opacity: 0.5;
+            transition: opacity 0.2s;
+        }
+        .station-box:hover .click-hint {
+            opacity: 0.8;
         }
         
         .highlight {
@@ -282,8 +287,8 @@
         .sub-text {
             font-size: 0.95em;
             color: var(--text-muted);
-            margin-top: 10px;
-            padding-top: 10px;
+            margin-top: 12px;
+            padding-top: 12px;
             border-top: 1px dashed var(--active-border-color, var(--border-color));
             transition: border-color 0.3s;
         }
@@ -298,7 +303,7 @@
             height: 6px;
             background-color: var(--active-progress-bg, var(--progress-bg));
             border-radius: 3px;
-            margin-top: 8px;
+            margin-top: 10px;
             overflow: hidden;
             transition: background-color 0.3s;
         }
@@ -308,11 +313,42 @@
             transition: width 1s linear, background-color 0.5s ease;
         }
 
+        /* 하단 플로팅 테마 버튼 (FAB) */
+        .theme-fab {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            width: 54px;
+            height: 54px;
+            border-radius: 27px;
+            background-color: var(--container-bg);
+            color: var(--text-color);
+            border: 1px solid var(--row-border);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            font-size: 1.6em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1), box-shadow 0.2s;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .theme-fab:active {
+            transform: scale(0.9);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        [data-theme="dark"] .theme-fab {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            border-color: var(--border-color);
+        }
+
         /* 모달(팝업) 스타일 */
         .modal-overlay {
             display: none;
             position: fixed;
-            z-index: 1000;
+            z-index: 2000;
             left: 0;
             top: 0;
             width: 100%;
@@ -330,16 +366,16 @@
         .modal-content {
             background-color: var(--modal-content);
             padding: 20px;
-            border-radius: 12px;
+            border-radius: 16px;
             width: 85%;
             max-width: 400px;
             max-height: 80vh;
             overflow-y: auto;
             position: relative;
             text-align: left;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             transform: translateY(20px);
-            transition: transform 0.3s ease;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .modal-overlay.show .modal-content {
             transform: translateY(0);
@@ -367,7 +403,7 @@
         
         .hour-row {
             display: flex;
-            padding: 10px;
+            padding: 12px 10px;
             border-bottom: 1px solid var(--row-border);
             border-radius: 8px;
         }
@@ -379,7 +415,7 @@
             border: 1px solid var(--active-border-color, var(--border-color));
         }
         .hour-label {
-            width: 50px;
+            width: 55px;
             font-weight: bold;
             color: var(--active-primary, var(--primary-color));
             flex-shrink: 0;
@@ -396,14 +432,15 @@
             text-align: center;
             margin-right: 6px;
             margin-bottom: 6px;
-            padding: 2px 0;
-            border-radius: 4px;
+            padding: 4px 0;
+            border-radius: 6px;
+            font-size: 0.95em;
         }
         /* 지나간 시간 취소선 */
         .minute-item.past {
             color: var(--gray-text);
             text-decoration: line-through;
-            opacity: 0.6;
+            opacity: 0.5;
         }
         /* 가장 빠른 다음 차 강조 배지 */
         .minute-item.next {
@@ -416,14 +453,23 @@
 </head>
 <body class="theme-p4">
 
+    <!-- 하단 플로팅 테마 전환 버튼 -->
+    <button class="theme-fab" id="themeIcon" onclick="toggleTheme()" aria-label="테마 변경">🌙</button>
+
     <div class="container">
-        <button class="theme-toggle" id="themeIcon" onclick="toggleTheme()">🌙</button>
         <h2 id="mainTitle">T1 셔틀버스 도착 안내</h2>
-        <div class="time-info">현재 시간: <strong id="currentTime"></strong></div>
         
+        <!-- 현재 시간 뱃지 -->
+        <div class="time-badge-wrapper">
+            <div class="time-badge">
+                현재 시간 <strong id="currentTime"></strong>
+            </div>
+        </div>
+        
+        <!-- iOS 스타일 세그먼트 컨트롤 탭 -->
         <div class="tab-container">
-            <button class="tab-btn tab-p4 active" onclick="switchTab('p4')">P4 (장기주차장)</button>
-            <button class="tab-btn tab-terminal" onclick="switchTab('terminal')">터미널 (T1)</button>
+            <button class="tab-btn active" onclick="switchTab('p4')">P4 (장기주차장)</button>
+            <button class="tab-btn" onclick="switchTab('terminal')">터미널 (T1)</button>
         </div>
 
         <div id="tab-p4" class="tab-content active">
@@ -463,6 +509,8 @@
                 localStorage.setItem('theme', 'dark');
             }
         }
+        
+        // 초기 로드 시 테마 복원
         if (localStorage.getItem('theme') === 'dark') {
             document.documentElement.setAttribute('data-theme', 'dark');
             document.getElementById('themeIcon').innerText = '☀️';
@@ -541,10 +589,11 @@
             const timeArr = station.data;
             const minArr = minData[key];
             
+            // 👆 대신 심플한 쉐브론 화살표 〉 적용
             let html = `
                 <div class="station-title">
                     <span>${title}</span>
-                    <span class="click-hint">👆 Time Table</span>
+                    <span class="click-hint">〉</span>
                 </div>`;
             
             let nextBusIndex = -1;
@@ -589,7 +638,8 @@
 
         function updateBusTime() {
             const now = new Date();
-            document.getElementById('currentTime').innerText = now.toLocaleTimeString('ko-KR', { hour12: false });
+            // 초까지 보여주기 원한다면 { hour12: false, second: '2-digit' } 추가
+            document.getElementById('currentTime').innerText = now.toLocaleTimeString('ko-KR', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
             const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
             Object.keys(stationData).forEach(key => {
